@@ -1,4 +1,5 @@
-﻿using Acme.ChatApp.Users;
+﻿using Acme.ChatApp.ApiLogsDto;
+using Acme.ChatApp.Users;
 using AutoMapper;
 using Volo.Abp.Identity;
 
@@ -12,5 +13,6 @@ public class ChatAppApplicationAutoMapperProfile : Profile
          * Alternatively, you can split your mapping configurations
          * into multiple profile classes for a better organization. */
         CreateMap<IdentityUser, UserDto>();
+        CreateMap<IdentitySecurityLog,LogsDto>();
     }
 }

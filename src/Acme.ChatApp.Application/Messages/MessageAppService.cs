@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Volo.Abp;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Users;
 
@@ -96,7 +97,7 @@ namespace Acme.ChatApp.Messages
             });
             return response;
         }
-        public async Task<bool> UpdateMessage(int msgId,string Content)
+        public async Task<Message> UpdateMessage(int msgId,string Content)
         {
             var CurrentUser = _currentUser.GetId();
             var messageEdit = await _context.Messages.FindAsync(msgId);
@@ -104,11 +105,11 @@ namespace Acme.ChatApp.Messages
             {
                 messageEdit.Content = Content;
                 await _context.SaveChangesAsync();
-                return true;
+                return messageEdit;
             }
             else
             {
-                return false;
+                throw new UserFriendlyException("Message not found");
             }
            ;
         }
