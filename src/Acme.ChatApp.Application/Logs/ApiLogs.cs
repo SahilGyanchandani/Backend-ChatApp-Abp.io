@@ -23,10 +23,10 @@ namespace Acme.ChatApp.Logs
             _context = context;
         }
 
-        public async Task<IEnumerable<LogsDto>> GetApiLogs()
+        public async Task<IEnumerable<ApiLog>> GetApiLogs()
         {
-            var logs=await _context.SecurityLogs.ToListAsync();
-            return ObjectMapper.Map<List<IdentitySecurityLog>, List<LogsDto>>(logs);
+            var logs=await _context.ApiLogs.ToListAsync();
+            return logs;
         }
 
     }

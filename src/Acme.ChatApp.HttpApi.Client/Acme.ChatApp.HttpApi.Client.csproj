@@ -13,7 +13,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="DistributedLock" Version="2.3.3" />
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection.StackExchangeRedis" Version="7.0.10" />
+    <PackageReference Include="StackExchange.Redis" Version="2.6.122" />
     <PackageReference Include="Volo.Abp.Account.HttpApi.Client" Version="7.3.2" />
+    <PackageReference Include="Volo.Abp.Caching.StackExchangeRedis" Version="7.3.2" />
     <PackageReference Include="Volo.Abp.Identity.HttpApi.Client" Version="7.3.2" />
     <PackageReference Include="Volo.Abp.PermissionManagement.HttpApi.Client" Version="7.3.2" />
     <PackageReference Include="Volo.Abp.TenantManagement.HttpApi.Client" Version="7.3.2" />
@@ -24,6 +28,12 @@
   <ItemGroup>
     <EmbeddedResource Include="**\*generate-proxy.json" />
     <Content Remove="**\*generate-proxy.json" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
+    <PackageReference Include="Volo.Abp.AspNetCore.SignalR">
+      <Version>7.3.2</Version>
+    </PackageReference>
   </ItemGroup>
 
 </Project>

@@ -1,7 +1,11 @@
 ﻿using Acme.ChatApp.EntityFrameworkCore;
+using Acme.ChatApp.Hubs;
+using Acme.ChatApp.Messages;
 using Acme.ChatApp.MessagesDto;
+using Acme.ChatApp.RedisConn;
 using Acme.ChatApp.ResponseModel;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -10,6 +14,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp;
 using Volo.Abp.Application.Services;
+using Volo.Abp.AspNetCore.SignalR;
 using Volo.Abp.Users;
 
 namespace Acme.ChatApp.Messages
@@ -19,10 +24,14 @@ namespace Acme.ChatApp.Messages
     {
         private readonly ICurrentUser _currentUser;
         private readonly ChatAppDbContext _context;
-        public MessageAppService(ICurrentUser currentUser, ChatAppDbContext dbContext)
+        private readonly IRedisConnection _connection;
+
+        public MessageAppService(ICurrentUser currentUser, ChatAppDbContext dbContext, IRedisConnection connection)
         {
             _currentUser = currentUser;
             _context = dbContext;
+            _connection = connection;
+           
         }
         public async Task<MessageResponse> CreateAsync(SendMessageDto msg)
         {

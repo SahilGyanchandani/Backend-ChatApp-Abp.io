@@ -1,4 +1,5 @@
-﻿using Acme.ChatApp.Messages;
+﻿using Acme.ChatApp.Logs;
+using Acme.ChatApp.Messages;
 using Microsoft.EntityFrameworkCore;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
@@ -40,6 +41,9 @@ public class ChatAppDbContext :
      */
     //Message
     public DbSet<Message>Messages { get; set; }
+
+    //ApiLogs
+    public DbSet<ApiLog>ApiLogs { get; set; }
 
     //Identity
     public DbSet<IdentityUser> Users { get; set; }

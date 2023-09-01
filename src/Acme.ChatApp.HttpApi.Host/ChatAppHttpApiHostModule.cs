@@ -28,11 +28,25 @@ using Volo.Abp.Modularity;
 using Volo.Abp.Swashbuckle;
 using Volo.Abp.UI.Navigation.Urls;
 using Volo.Abp.VirtualFileSystem;
+using Polly;
+using StackExchange.Redis;
+using Acme.ChatApp.RedisConn;
+using Acme.ChatApp.Messages;
+using Volo.Abp.AutoMapper;
+using Acme.ChatApp.Hubs;
+using Volo.Abp.AspNetCore.SignalR;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Hosting;
+using Volo.Abp.Caching.StackExchangeRedis;
+using Medallion.Threading;
+using Medallion.Threading.Redis;
+using Acme.ChatApp.Middleware;
 
 namespace Acme.ChatApp;
 
 [DependsOn(
     typeof(ChatAppHttpApiModule),
+    typeof(AbpCachingStackExchangeRedisModule),
     typeof(AbpAutofacModule),
     typeof(AbpAspNetCoreMultiTenancyModule),
     typeof(ChatAppApplicationModule),
@@ -40,7 +54,8 @@ namespace Acme.ChatApp;
     typeof(AbpAspNetCoreMvcUiLeptonXLiteThemeModule),
     typeof(AbpAccountWebOpenIddictModule),
     typeof(AbpAspNetCoreSerilogModule),
-    typeof(AbpSwashbuckleModule)
+    typeof(AbpSwashbuckleModule),
+    typeof(AbpAspNetCoreSignalRModule) //Add the new module dependency
 )]
 public class ChatAppHttpApiHostModule : AbpModule
 {
@@ -62,10 +77,25 @@ public class ChatAppHttpApiHostModule : AbpModule
         var configuration = context.Services.GetConfiguration();
         var hostingEnvironment = context.Services.GetHostingEnvironment();
 
+        context.Services.AddSingleton(ConnectionMultiplexer.Connect("localhost:6379"));
+
+        context.Services.AddTransient<IRedisConnection, RedisConnection>();
+
+        context.Services.AddTransient<RequestLoggingMiddleware>();
+
+        //context.Services.AddTransient<ChatHub>();
+
+        context.Services.AddStackExchangeRedisCache(option =>
+          option.Configuration = "localhost:6379"
+      );
+
+
         ConfigureAuthentication(context);
         ConfigureBundles();
         ConfigureUrls(configuration);
         ConfigureConventionalControllers();
+        ConfigureDataProtection(context, configuration, hostingEnvironment);
+        ConfigureDistributedLocking(context, configuration);
         ConfigureVirtualFileSystem(context);
         ConfigureCors(context, configuration);
         ConfigureSwaggerServices(context, configuration);
@@ -133,6 +163,31 @@ public class ChatAppHttpApiHostModule : AbpModule
             options.ConventionalControllers.Create(typeof(ChatAppApplicationModule).Assembly);
         });
     }
+    private void ConfigureDataProtection(
+     ServiceConfigurationContext context,
+     IConfiguration configuration,
+     IWebHostEnvironment hostingEnvironment)
+    {
+        var dataProtectionBuilder = context.Services.AddDataProtection().SetApplicationName("ChatApp");
+        if (!hostingEnvironment.IsDevelopment())
+        {
+            var redis = ConnectionMultiplexer.Connect(configuration["Redis:Configuration"]);
+            dataProtectionBuilder.PersistKeysToStackExchangeRedis(redis, "ChatApp-Protection-Keys");
+        }
+    }
+
+    private void ConfigureDistributedLocking(
+       ServiceConfigurationContext context,
+       IConfiguration configuration)
+    {
+        context.Services.AddSingleton<IDistributedLockProvider>(sp =>
+        {
+            var connection = ConnectionMultiplexer
+                .Connect(configuration["Redis:Configuration"]);
+            return new RedisDistributedSynchronizationProvider(connection.GetDatabase());
+        });
+    }
+
 
     private static void ConfigureSwaggerServices(ServiceConfigurationContext context, IConfiguration configuration)
     {
@@ -201,6 +256,7 @@ public class ChatAppHttpApiHostModule : AbpModule
 
         app.UseUnitOfWork();
         app.UseAuthorization();
+        app.UseMiddleware<RequestLoggingMiddleware>();
 
         app.UseSwagger();
         app.UseAbpSwaggerUI(c =>
