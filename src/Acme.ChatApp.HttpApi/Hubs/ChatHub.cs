@@ -1,4 +1,5 @@
 ﻿
+using Acme.ChatApp.Messages;
 using Acme.ChatApp.MessagesDto;
 using Acme.ChatApp.RedisConn;
 using Microsoft.AspNetCore.SignalR;
@@ -32,13 +33,11 @@ namespace Acme.ChatApp.Hubs
             await base.OnConnectedAsync();
         }
 
-        public async Task SendMessage(SendMessageDto msg)
+        public async Task SendMessage(Message msg)
         {
-            var userId = Context.UserIdentifier;
+            var connectionId = await _connection.GenConnIdAsync(Convert.ToString(msg.ReceiverId));
 
-            var receiverConnectionId = await _connection.GenConnIdAsync(Convert.ToString(msg.ReceiverId));
-
-            await Clients.Client(receiverConnectionId).SendAsync("Broadcast", msg, userId);
+            await Clients.Client(connectionId).SendAsync("Broadcast", msg);
         }
     }
 }
