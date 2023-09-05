@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Azure.Core;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -16,6 +18,7 @@ using static Google.Apis.Auth.GoogleJsonWebSignature;
 
 namespace Acme.ChatApp.GoogleLogin
 {
+    //[Authorize]
     public class GoogleAuthenticationAppService:ApplicationService,ITransientDependency
     {
         private readonly UserManager<IdentityUser> _userManager;
@@ -34,7 +37,7 @@ namespace Acme.ChatApp.GoogleLogin
                 throw new UserFriendlyException("Invalid input data.");
             }
 
-            var user = await AuthenticateAndCreateUserAsync(request);
+            var user = (await AuthenticateAndCreateUserAsync(request));
             return user;
         }
 

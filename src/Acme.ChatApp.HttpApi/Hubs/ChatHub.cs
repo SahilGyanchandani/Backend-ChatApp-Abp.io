@@ -39,5 +39,21 @@ namespace Acme.ChatApp.Hubs
 
             await Clients.Client(connectionId).SendAsync("Broadcast", msg);
         }
+
+        public async Task EditMessage(Message msg)
+        {
+            var connectionId = await _connection.GenConnIdAsync(Convert.ToString(msg.ReceiverId));
+
+            await Clients.Client(connectionId).SendAsync("editMsgSignalR", msg);
+        }
+
+        public async Task DeleteMessage(Message msg)
+        {
+            var connectionId = await _connection.GenConnIdAsync(Convert.ToString(msg.ReceiverId));
+
+            await Clients.Client(connectionId).SendAsync("DeleteMsgSignalR", msg);
+
+        }
+
     }
 }

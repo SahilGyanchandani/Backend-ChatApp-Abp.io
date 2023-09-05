@@ -23,17 +23,12 @@ using Volo.Abp.AspNetCore.Mvc.UI.Bundling;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.Shared;
 using Volo.Abp.AspNetCore.Serilog;
 using Volo.Abp.Autofac;
-using Volo.Abp.Localization;
 using Volo.Abp.Modularity;
 using Volo.Abp.Swashbuckle;
 using Volo.Abp.UI.Navigation.Urls;
 using Volo.Abp.VirtualFileSystem;
-using Polly;
 using StackExchange.Redis;
 using Acme.ChatApp.RedisConn;
-using Acme.ChatApp.Messages;
-using Volo.Abp.AutoMapper;
-using Acme.ChatApp.Hubs;
 using Volo.Abp.AspNetCore.SignalR;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
@@ -83,6 +78,7 @@ public class ChatAppHttpApiHostModule : AbpModule
 
         context.Services.AddTransient<RequestLoggingMiddleware>();
 
+
         //context.Services.AddTransient<ChatHub>();
 
         context.Services.AddStackExchangeRedisCache(option =>
@@ -104,6 +100,12 @@ public class ChatAppHttpApiHostModule : AbpModule
     private void ConfigureAuthentication(ServiceConfigurationContext context)
     {
         context.Services.ForwardIdentityAuthenticationForBearer(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme);
+
+        context.Services.AddAuthentication().AddGoogle(options =>
+        {
+            options.ClientId = "527113738950-dko6gej3u7rrse1luc2b95a23urt47lm.apps.googleusercontent.com";
+            options.ClientSecret = "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";
+        });
     }
 
     private void ConfigureBundles()

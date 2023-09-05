@@ -120,7 +120,6 @@ namespace Acme.ChatApp.Messages
             {
                 throw new UserFriendlyException("Message not found");
             }
-           ;
         }
         public async Task<bool> DeleteMessage(int msgId)
         {
