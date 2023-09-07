@@ -38,6 +38,7 @@ namespace Acme.ChatApp.GoogleLogin
             }
 
             var user = (await AuthenticateAndCreateUserAsync(request));
+            //var accessToken = CreateAccessToken(CreateJwtClaims(loginResult.Identity));
             return user;
         }
 

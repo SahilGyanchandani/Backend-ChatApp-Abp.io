@@ -51,16 +51,6 @@ namespace Acme.ChatApp.Middleware
 
         private string userName()
         {
-            //var current = _currentUser.GetId();
-            //if(current!=null)
-            //{
-            //    var User = _dbContext.Users.Where(m => m.Id == current).Select(m => m.UserName).FirstOrDefault();
-            //    return User;
-            //}
-            //else
-            //{
-            //    return "Anonymous";
-            //}
             try
             {
                 var current = _currentUser.GetId();

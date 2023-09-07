@@ -36,6 +36,7 @@ using Volo.Abp.Caching.StackExchangeRedis;
 using Medallion.Threading;
 using Medallion.Threading.Redis;
 using Acme.ChatApp.Middleware;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Acme.ChatApp;
 
@@ -74,12 +75,9 @@ public class ChatAppHttpApiHostModule : AbpModule
 
         context.Services.AddSingleton(ConnectionMultiplexer.Connect("localhost:6379"));
 
-        context.Services.AddTransient<IRedisConnection, RedisConnection>();
+        context.Services.AddScoped<IRedisConnection, RedisConnection>();
 
-        context.Services.AddTransient<RequestLoggingMiddleware>();
-
-
-        //context.Services.AddTransient<ChatHub>();
+        context.Services.AddScoped<RequestLoggingMiddleware>();
 
         context.Services.AddStackExchangeRedisCache(option =>
           option.Configuration = "localhost:6379"

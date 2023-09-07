@@ -16,6 +16,7 @@ using Volo.Abp;
 using Volo.Abp.Application.Services;
 using Volo.Abp.AspNetCore.SignalR;
 using Volo.Abp.Users;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Acme.ChatApp.Messages
 {
@@ -85,18 +86,26 @@ namespace Acme.ChatApp.Messages
 
             return response;
         }
+
         public async Task<IEnumerable<MessageResponse>> GetSearchConversation(string query)
         {
             var currentUser = _currentUser.GetId();
 
-            // Search for messages that contain the provided keywords in the conversation of the current user
-            var conversations = await _context.Messages
-                .Where(m => (m.SenderId == currentUser || m.ReceiverId == currentUser) &&
-                            EF.Functions.Like(m.Content, $"%{query}%")) // Using EF.Functions.Like for case-insensitive comparison
-                .OrderBy(m => m.Timestamp)
-                .ToListAsync();
+            var keywords = query.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
-            var response = conversations.Select(m => new MessageResponse
+            //Fetch all messages of the current user
+               var users = await _context.Messages
+                   .Where(m => (m.SenderId == currentUser || m.ReceiverId == currentUser))
+                   .ToListAsync();
+
+            // Filter messages containing the provided keywords
+            var conversation = users
+                .Where(m => keywords.Any(keyword => m.Content.Contains(keyword, StringComparison.OrdinalIgnoreCase)))
+                .OrderBy(m => m.Timestamp)
+                .ToList();
+
+
+            var response = conversation.Select(m => new MessageResponse
             {
                 MessageId = m.MessageId,
                 SenderId = m.SenderId,
@@ -106,6 +115,7 @@ namespace Acme.ChatApp.Messages
             });
             return response;
         }
+
         public async Task<Message> UpdateMessage(int msgId,string Content)
         {
             var CurrentUser = _currentUser.GetId();
