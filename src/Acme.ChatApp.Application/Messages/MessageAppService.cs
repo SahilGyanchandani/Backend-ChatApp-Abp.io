@@ -57,14 +57,14 @@ namespace Acme.ChatApp.Messages
             };
             return response;
         }
+
         public async Task<IEnumerable<MessageResponse>> GetConversationHistory(Guid receiverId, DateTime? before = null, int count = 20, string sort = "asc")
         {
-            var CurrentUser = _currentUser.GetId();
-
+            var currentUser = _currentUser.GetId();
             bool isAscending = sort.ToLower() == "asc";
 
             var messages = await _context.Messages
-               .Where(m => m.SenderId == CurrentUser && m.ReceiverId == receiverId || m.SenderId == receiverId && m.ReceiverId == CurrentUser)
+               .Where(m => m.SenderId == currentUser && m.ReceiverId == receiverId || m.ReceiverId == receiverId && m.ReceiverId == currentUser)
                .Where(m => before == null || (isAscending ? m.Timestamp < before : m.Timestamp > before))
                .OrderByDescending(m => m.Timestamp)
                .Take(count)
@@ -86,6 +86,7 @@ namespace Acme.ChatApp.Messages
 
             return response;
         }
+
 
         public async Task<IEnumerable<MessageResponse>> GetSearchConversation(string query)
         {
