@@ -64,7 +64,7 @@ namespace Acme.ChatApp.Messages
             bool isAscending = sort.ToLower() == "asc";
 
             var messages = await _context.Messages
-               .Where(m => m.SenderId == currentUser && m.ReceiverId == receiverId || m.ReceiverId == receiverId && m.ReceiverId == currentUser)
+               .Where(m => m.SenderId == currentUser && m.ReceiverId == receiverId || m.SenderId == receiverId && m.ReceiverId == currentUser)
                .Where(m => before == null || (isAscending ? m.Timestamp < before : m.Timestamp > before))
                .OrderByDescending(m => m.Timestamp)
                .Take(count)
